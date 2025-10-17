@@ -6,10 +6,14 @@ if ! command -v mas &>/dev/null; then
   brew install mas
 fi
 
-# Sign into App Store (mas will prompt if needed)
-# (Requires the user’s Apple ID credentials)
-echo "Ensuring you are signed into the Mac App Store..."
-mas account || true  # this will show current Apple ID or prompt you
+# Try to get the account (but don’t fail if not supported)
+if command -v mas &>/dev/null; then
+  if mas account &>/dev/null; then
+    echo "Signed into App Store via mas"
+  else
+    echo "mas signin not supported — skipping login"
+  fi
+fi
 
 # List of Mac App Store app IDs to install
 mas_apps=(

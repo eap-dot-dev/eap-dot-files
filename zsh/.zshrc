@@ -64,6 +64,14 @@ if [[ -f "${HOME}/.eap-dot-files/zsh/custom-prompt.zsh" ]]; then
   source "${HOME}/.eap-dot-files/zsh/custom-prompt.zsh"
 fi
 
+# pnpm
+export PNPM_HOME="/Users/epanahi/Library/pnpm"
+case ":$PATH:" in
+  *":$PNPM_HOME:"*) ;;
+  *) export PATH="$PNPM_HOME/bin:$PATH" ;;
+esac
+# pnpm end
+
 # ——— Replay Deferred compdef Commands ———
 zinit cdreplay -q
 

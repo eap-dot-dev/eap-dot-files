@@ -18,6 +18,7 @@ brew "asdf"            # manage runtime versions
 cask "visual-studio-code"
 cask "ghostty"
 cask "firefox"
+cask "webstorm"
 cask "1password"       # Password manager
 cask "obsidian"        # Markdown-based knowledge base app
 cask "bettermouse"     # Mouse utility

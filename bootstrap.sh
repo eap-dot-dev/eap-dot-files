@@ -55,6 +55,22 @@ brew bundle --file="$REPO_DIR/Brewfile"
 # ASDF setup
 bash "$REPO_DIR/asdf/init-asdf.sh"
 
+if command -v pnpm &>/dev/null; then
+  echo "Configuring pnpm global bin directory"
+  export PNPM_HOME="${HOME}/Library/pnpm"
+  mkdir -p "${PNPM_HOME}/bin"
+  case ":$PATH:" in
+    *":${PNPM_HOME}/bin:"*) ;;
+    *) export PATH="${PNPM_HOME}/bin:${PATH}" ;;
+  esac
+  pnpm config set global-bin-dir "${PNPM_HOME}/bin"
+  
+  echo "Installing Claude Code via pnpm"
+  pnpm install -g @anthropic-ai/claude-code || echo "pnpm global install failed"
+else
+  echo "pnpm not found — skipping Claude Code install"
+fi
+
 # Symlink Zsh configs
 echo "Linking Zsh config files..."
 ln -sf "$REPO_DIR/zsh/.zshrc" "$HOME/.zshrc"
