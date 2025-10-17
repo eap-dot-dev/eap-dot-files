@@ -24,7 +24,7 @@ for i in "${!plugins[@]}"; do
   echo "Installing $plugin version $version"
   asdf install "$plugin" "$version"
   echo "Setting global $plugin -> $version"
-  asdf global "$plugin" "$version"
+  asdf set -u "$plugin" "$version"
 done
 
 asdf reshim

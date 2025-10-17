@@ -60,10 +60,10 @@ echo "Linking Zsh config files..."
 ln -sf "$REPO_DIR/zsh/.zshrc" "$HOME/.zshrc"
 ln -sf "$REPO_DIR/zsh/.p10k.zsh" "$HOME/.p10k.zsh"
 
-# macOS app / shell tweaks
-if [[ -f "$REPO_DIR/scripts/install-macos-apps.sh" ]]; then
-  echo "Running macOS app install script..."
-  bash "$REPO_DIR/scripts/install-macos-apps.sh"
+# Now run your macOS apps script
+if [[ -f "$REPO_DIR/scripts/macos/install-macos-apps.sh" ]]; then
+  echo "Installing macOS apps (casks, App Store, etc.)"
+  bash "$REPO_DIR/scripts/macos/install-macos-apps.sh"
 fi
 
 # GH CLI / remote setup

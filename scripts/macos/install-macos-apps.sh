@@ -1,13 +1,5 @@
 #!/usr/bin/env bash
 
-BREW_ZSH="$(which zsh)"
-if ! grep -q "$BREW_ZSH" /etc/shells; then
-  echo "Adding $BREW_ZSH to /etc/shells"
-  echo "$BREW_ZSH" | sudo tee -a /etc/shells
-fi
-echo "Changing default shell to brew-installed zsh"
-chsh -s "$BREW_ZSH"
-
 # Ensure mas is installed (via Homebrew)
 if ! command -v mas &>/dev/null; then
   echo "Installing mas CLI..."
