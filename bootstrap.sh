@@ -76,6 +76,10 @@ echo "Linking Zsh config files..."
 ln -sf "$REPO_DIR/zsh/.zshrc" "$HOME/.zshrc"
 ln -sf "$REPO_DIR/zsh/.p10k.zsh" "$HOME/.p10k.zsh"
 
+echo "Linking Ghostty config files"
+mkdir -p ~/.config/ghostty
+ln -sf "$REPO_DIR/ghostty/config" "$HOME/.config/ghostty/config"
+
 # Now run your macOS apps script
 if [[ -f "$REPO_DIR/scripts/macos/install-macos-apps.sh" ]]; then
   echo "Installing macOS apps (casks, App Store, etc.)"
