@@ -1,7 +1,7 @@
 # ---------- Theme ----------
 # Default to a dark theme (swap to your favorite built-in or custom).
 # If you ever want auto light/dark, use: theme = dark:<DarkName>,light:<LightName>
-theme = "JetBrains Darcula"
+# theme = "JetBrains Darcula"
 
 # ---------- Fonts (optional defaults) ----------
 font-family = "JetBrains Mono"
