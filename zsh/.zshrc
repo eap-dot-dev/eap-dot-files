@@ -59,9 +59,11 @@ if [[ -n ${GHOSTTY_RESOURCES_DIR:-} ]]; then
   source "${GHOSTTY_RESOURCES_DIR}/shell-integration/zsh/ghostty-integration"
 fi
 
-# ——— Custom Prompt Overrides / Segments ———
-if [[ -f "${HOME}/.eap-dot-files/zsh/custom-prompt.zsh" ]]; then
-  source "${HOME}/.eap-dot-files/zsh/custom-prompt.zsh"
+# ——— Secrets / Environment Variables ———
+# Load sensitive environment variables (API keys, tokens, etc.)
+# This file is not tracked in git
+if [[ -f "${HOME}/.secrets.sh" ]]; then
+  source "${HOME}/.secrets.sh"
 fi
 
 # pnpm
