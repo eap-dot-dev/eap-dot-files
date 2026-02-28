@@ -46,14 +46,21 @@ _detect_platform() {
             ;;
         esac
       fi
+      if [[ -z "$DOTFILES_DISTRO" ]]; then
+        DOTFILES_DISTRO="unknown"
+      fi
       ;;
     *)
-      log_error "Unsupported OS: $kernel"
+      printf '\033[0;31m[ ERR]\033[0m %s\n' "Unsupported OS: $kernel" >&2
       exit 1
       ;;
   esac
 
-  DOTFILES_ARCH="$(uname -m)"
+  case "$(uname -m)" in
+    x86_64|amd64)  DOTFILES_ARCH="x86_64" ;;
+    aarch64|arm64) DOTFILES_ARCH="arm64" ;;
+    *)             DOTFILES_ARCH="$(uname -m)" ;;
+  esac
 }
 
 _detect_platform
