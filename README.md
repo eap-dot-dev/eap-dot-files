@@ -1,56 +1,81 @@
 # eap-dot-files
 
-Dotfiles + bootstrap setup for Zsh + ASDF (macOS / Linux)  
-Cloned under `~/Development/eap-dot-files`
+Cross-platform dotfiles and machine setup for macOS, Linux, and Windows.
 
-## What it does
+## Quick Start
 
-- Installs Homebrew and requisite CLI / GUI apps using `Brewfile`  
-- Installs and configures ASDF with plugins `nodejs` and `python` at specified versions  
-- Sets global defaults via ASDF  
-- Sets up Zsh with Powerlevel10k, autosuggestions, syntax highlighting, Ghostty integration  
-- Uses `gh` CLI to help create / push the repo if needed  
-- Provides a “pre-bootstrap” script for initial setup (before switching to Ghostty)  
+### macOS (fresh machine)
 
-## Usage
-
-**Step 1: pre-bootstrap (in macOS Terminal)**  
+**Step 1** — In Terminal.app (pre-bootstrap):
 ```bash
-# Assuming you’ve transferred the `scripts/macos/macos-init.sh` script
-chmod +x macos-init.sh
-./macos-init.sh
+# Transfer or curl the init script, then:
+bash scripts/macos/setup-macos-init.sh
 ```
 
-This will:
- - Ask for hostname and apply it
- - Install Homebrew, gh, Ghostty
- - Create ~/Development
- - Clone eap-dot-files into ~/Development/eap-dot-files
-
-Then open Ghostty and run:
-
-**Step 2: main bootstrap (inside Ghostty)**
+**Step 2** — In Ghostty:
 ```bash
 cd ~/Development/eap-dot-files
-chmod +x bootstrap.sh
-./bootstrap.sh
+bash setup.sh
 ```
 
-That will:
- - Install / update Homebrew dependencies (via Brewfile)
- - Run ASDF initialization and install specified plugin versions
- - Symlink Zsh config files
- - Optionally create / push remote repo using gh
- - Set default shell, etc.
+### Linux (Ubuntu/Debian or Fedora/RHEL)
+
+```bash
+git clone https://github.com/eap-dot-dev/eap-dot-files.git ~/Development/eap-dot-files
+cd ~/Development/eap-dot-files
+bash setup.sh
+```
+
+### Windows
+
+```powershell
+# In PowerShell (as Administrator):
+git clone https://github.com/eap-dot-dev/eap-dot-files.git $HOME\Development\eap-dot-files
+cd $HOME\Development\eap-dot-files
+.\setup.ps1
+```
+
+This installs Windows apps via winget, sets up WSL, and runs `setup.sh` inside WSL automatically.
+
+## What Gets Installed
+
+All packages are declared in `packages.toml`. Each package lists per-platform identifiers — missing keys mean the package is skipped on that platform.
+
+### CLI Tools
+git, zsh, fzf, fd, bat, htop, ripgrep, curl, GitHub CLI
+
+### GUI Apps
+Ghostty, VS Code, WebStorm, Firefox, 1Password, Obsidian
+macOS-only: BetterMouse, BetterDisplay, BetterTouchTool
+
+### Runtimes (via ASDF)
+Node.js, Python
+
+### Global Packages (via pnpm)
+Claude Code
+
+## Structure
+
+```
+setup.sh              # Entry point (macOS/Linux/WSL)
+setup.ps1             # Entry point (Windows)
+packages.toml         # Unified package manifest
+lib/                  # Shared bash functions
+config/               # Dotfiles (symlinked to ~)
+scripts/common/       # Cross-platform setup steps
+scripts/macos/        # macOS-specific setup
+scripts/linux/        # Linux-specific setup
+scripts/windows/      # Windows PowerShell scripts
+```
 
 ## Customization
- - Edit asdf/init-asdf.sh if you wish to change plugin versions or add plugins
- - Edit Zsh configs (zsh/.zshrc, zsh/custom-prompt.zsh, zsh/.p10k.zsh) to adjust prompt, plugin behavior, etc
- - Add or remove apps in Brewfile or in scripts/macos/install-macos-apps.sh
 
-## Notes & caveats
- - Ensure build dependencies are present (e.g. for compiling Python / Node)
- - If ASDF plugin version install fails, script will abort (because of set -euo pipefail)
- - Verify Ghostty shell integration works (prompt redraw, cursor behavior)
- - You may need to run p10k configure after initial bootstrap
- 
+- **Add/remove packages**: Edit `packages.toml`
+- **Change runtime versions**: Edit `[asdf-runtimes]` in `packages.toml`
+- **Shell config**: Edit `config/zsh/.zshrc`
+- **Terminal config**: Edit `config/ghostty/config` (shared) or `config.macos`/`config.linux` (platform-specific)
+- **Secrets**: Copy `~/.secrets.sh.template` to `~/.secrets.sh` and fill in values
+
+## Re-running
+
+Setup is idempotent — safe to run anytime to update or fix your setup. Already-installed packages are skipped, existing symlinks are preserved.
