@@ -13,6 +13,11 @@ install_packages_from_toml() {
     return 1
   fi
 
+  if [[ -z "$DOTFILES_PKG" ]] || [[ -z "$DOTFILES_OS" ]]; then
+    log_error "Platform not detected. Source lib/platform.sh first."
+    return 1
+  fi
+
   log_info "Reading package manifest: $toml_file"
 
   local current_section=""
@@ -47,8 +52,11 @@ install_packages_from_toml() {
           log_warn "Already installed: $value"
           ((skip_count++))
         else
-          install_pkg "$key" "$value"
-          ((install_count++))
+          if install_pkg "$key" "$value"; then
+            ((install_count++))
+          else
+            log_error "Failed to install $value — continuing"
+          fi
         fi
       fi
     fi
@@ -63,16 +71,16 @@ is_pkg_installed() {
 
   case "$manager" in
     brew)
-      brew list --formula "$pkg" &>/dev/null 2>&1
+      brew list --formula "$pkg" &>/dev/null
       ;;
     cask)
-      brew list --cask "$pkg" &>/dev/null 2>&1
+      brew list --cask "$pkg" &>/dev/null
       ;;
     apt)
-      dpkg -s "$pkg" &>/dev/null 2>&1
+      dpkg -s "$pkg" &>/dev/null
       ;;
     dnf)
-      rpm -q "$pkg" &>/dev/null 2>&1
+      rpm -q "$pkg" &>/dev/null
       ;;
     *)
       return 1
@@ -87,22 +95,35 @@ install_pkg() {
   log_info "Installing $pkg via $manager..."
   case "$manager" in
     brew)
-      brew install "$pkg"
+      if ! brew install "$pkg"; then
+        log_error "Failed to install $pkg via $manager"
+        return 1
+      fi
       ;;
     cask)
-      brew install --cask "$pkg"
+      if ! brew install --cask "$pkg"; then
+        log_error "Failed to install $pkg via $manager"
+        return 1
+      fi
       ;;
     apt)
-      sudo apt-get install -y "$pkg"
+      if ! sudo apt-get install -y "$pkg"; then
+        log_error "Failed to install $pkg via $manager"
+        return 1
+      fi
       ;;
     dnf)
-      sudo dnf install -y "$pkg"
+      if ! sudo dnf install -y "$pkg"; then
+        log_error "Failed to install $pkg via $manager"
+        return 1
+      fi
       ;;
     *)
       log_error "Unknown package manager: $manager"
       return 1
       ;;
   esac
+  log_ok "Installed $pkg"
 }
 
 ensure_brew() {
