@@ -29,15 +29,21 @@ link_file() {
   if [[ -e "$dest" ]] || [[ -L "$dest" ]]; then
     mkdir -p "$DOTFILES_BACKUP_DIR"
     local backup_name
-    backup_name="$(basename "$dest").$(date +%Y%m%d%H%M%S)"
-    mv "$dest" "${DOTFILES_BACKUP_DIR}/${backup_name}"
+    backup_name="$(basename "$dest").$(date +%Y%m%d%H%M%S).$$"
+    mv "$dest" "${DOTFILES_BACKUP_DIR}/${backup_name}" || {
+      log_error "Failed to backup $dest"
+      return 1
+    }
     log_warn "Backed up existing $dest to ${DOTFILES_BACKUP_DIR}/${backup_name}"
   fi
 
   # Create parent directory if needed
   mkdir -p "$(dirname "$dest")"
 
-  ln -s "$src" "$dest"
+  ln -s "$src" "$dest" || {
+    log_error "Failed to create symlink: $dest"
+    return 1
+  }
   log_ok "Linked: $dest -> $src"
 }
 
@@ -65,12 +71,18 @@ link_config_dir() {
   if [[ -e "$dest" ]] || [[ -L "$dest" ]]; then
     mkdir -p "$DOTFILES_BACKUP_DIR"
     local backup_name
-    backup_name="$(basename "$dest").$(date +%Y%m%d%H%M%S)"
-    mv "$dest" "${DOTFILES_BACKUP_DIR}/${backup_name}"
+    backup_name="$(basename "$dest").$(date +%Y%m%d%H%M%S).$$"
+    mv "$dest" "${DOTFILES_BACKUP_DIR}/${backup_name}" || {
+      log_error "Failed to backup $dest"
+      return 1
+    }
     log_warn "Backed up existing $dest to ${DOTFILES_BACKUP_DIR}/${backup_name}"
   fi
 
   mkdir -p "$(dirname "$dest")"
-  ln -s "$src" "$dest"
+  ln -s "$src" "$dest" || {
+    log_error "Failed to create symlink: $dest"
+    return 1
+  }
   log_ok "Linked: $dest -> $src"
 }
