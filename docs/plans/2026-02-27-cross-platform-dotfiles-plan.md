@@ -672,7 +672,7 @@ Copy `zsh/.zshrc` to `config/zsh/.zshrc` and replace the hardcoded pnpm path:
 Replace lines 69-75 of the current `zsh/.zshrc`:
 ```bash
 # pnpm
-export PNPM_HOME="/Users/epanahi/Library/pnpm"
+export PNPM_HOME="$HOME/Library/pnpm"
 case ":$PATH:" in
   *":$PNPM_HOME:"*) ;;
   *) export PATH="$PNPM_HOME/bin:$PATH" ;;
