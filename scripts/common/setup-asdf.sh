@@ -45,26 +45,32 @@ plugin_urls=(
   "https://github.com/asdf-community/asdf-python.git"
 )
 
-# Read versions from packages.toml [asdf-runtimes] section
-declare -A runtime_versions
-in_asdf_section=false
-while IFS= read -r line; do
-  if [[ "$line" == "[asdf-runtimes]" ]]; then
-    in_asdf_section=true
-    continue
-  fi
-  if $in_asdf_section; then
-    [[ "$line" =~ ^\[ ]] && break
-    if [[ "$line" =~ ^([a-z]+)[[:space:]]*=[[:space:]]*\"([^\"]+)\" ]]; then
-      runtime_versions["${BASH_REMATCH[1]}"]="${BASH_REMATCH[2]}"
+# Read version for a plugin from packages.toml [asdf-runtimes] section.
+# Bash 3.2 compatible — no associative arrays.
+_toml_runtime_version() {
+  local target="$1"
+  local in_section=false
+  while IFS= read -r line; do
+    if [[ "$line" == "[asdf-runtimes]" ]]; then
+      in_section=true
+      continue
     fi
-  fi
-done < "$REPO_DIR/packages.toml"
+    if $in_section; then
+      [[ "$line" =~ ^\[ ]] && break
+      if [[ "$line" =~ ^([a-z]+)[[:space:]]*=[[:space:]]*\"([^\"]+)\" ]]; then
+        if [[ "${BASH_REMATCH[1]}" == "$target" ]]; then
+          echo "${BASH_REMATCH[2]}"
+          return
+        fi
+      fi
+    fi
+  done < "$REPO_DIR/packages.toml"
+}
 
 for i in "${!plugins[@]}"; do
   plugin="${plugins[i]}"
   url="${plugin_urls[i]}"
-  version="${runtime_versions[$plugin]:-}"
+  version="$(_toml_runtime_version "$plugin")"
 
   if [[ -z "$version" ]]; then
     log_warn "No version specified for $plugin in packages.toml, skipping"

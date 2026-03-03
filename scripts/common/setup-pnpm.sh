@@ -8,6 +8,13 @@ set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_DIR="$(cd "$SCRIPT_DIR/../.." && pwd)"
 
+# Ensure ASDF shims are in PATH (node is required by pnpm)
+if command -v brew &>/dev/null && [[ -f "$(brew --prefix)/opt/asdf/libexec/asdf.sh" ]]; then
+  . "$(brew --prefix)/opt/asdf/libexec/asdf.sh"
+elif [[ -f "$HOME/.asdf/asdf.sh" ]]; then
+  . "$HOME/.asdf/asdf.sh"
+fi
+
 # Install pnpm on Linux if not available
 if ! command -v pnpm &>/dev/null; then
   if [[ "$DOTFILES_OS" == "linux" ]]; then

@@ -35,10 +35,7 @@ zinit ice wait lucid
 zinit light zsh-users/zsh-syntax-highlighting
 
 if command -v fzf &>/dev/null; then
-  # Check if `fzf` supports --completion flag
-  if fzf --help 2>&1 | grep -q -- "--completion"; then
-    source <(fzf --completion) 2>/dev/null || true
-  fi
+  source <(fzf --zsh) 2>/dev/null || true
 fi
 
 # ——— ASDF Integration ———
@@ -73,10 +70,16 @@ else
   export PNPM_HOME="$HOME/.local/share/pnpm"
 fi
 case ":$PATH:" in
-  *":$PNPM_HOME:"*) ;;
+  *":$PNPM_HOME/bin:"*) ;;
   *) export PATH="$PNPM_HOME/bin:$PATH" ;;
 esac
 # pnpm end
+
+# ——— Local binaries (Claude Code, etc.) ———
+case ":$PATH:" in
+  *":$HOME/.local/bin:"*) ;;
+  *) export PATH="$HOME/.local/bin:$PATH" ;;
+esac
 
 # ——— Replay Deferred compdef Commands ———
 zinit cdreplay -q

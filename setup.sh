@@ -61,7 +61,20 @@ bash "$REPO_DIR/scripts/common/setup-shell.sh"
 
 bash "$REPO_DIR/scripts/common/setup-pnpm.sh"
 
-# --- Step 6: Symlink Configs ---------------------------------------------
+# --- Step 6: Claude Code -------------------------------------------------
+
+if [[ -x "$HOME/.local/bin/claude" ]]; then
+  log_warn "Claude Code already installed"
+else
+  log_info "Installing Claude Code via native installer..."
+  if curl -fsSL https://claude.ai/install.sh | bash; then
+    log_ok "Claude Code installed"
+  else
+    log_warn "Claude Code install failed (network issue?) — install manually: curl -fsSL https://claude.ai/install.sh | bash"
+  fi
+fi
+
+# --- Step 7: Symlink Configs ---------------------------------------------
 
 log_info "Linking configuration files..."
 
@@ -72,6 +85,8 @@ link_file "$REPO_DIR/config/secrets.sh.template" "$HOME/.secrets.sh.template"
 # Ghostty: concatenate shared + platform-specific config
 mkdir -p "$HOME/.config/ghostty"
 GHOSTTY_CONFIG="$HOME/.config/ghostty/config"
+# Remove any existing file/symlink (may be dangling from old layout)
+[[ -e "$GHOSTTY_CONFIG" || -L "$GHOSTTY_CONFIG" ]] && rm -f "$GHOSTTY_CONFIG"
 
 {
   cat "$REPO_DIR/config/ghostty/config"
@@ -82,7 +97,7 @@ GHOSTTY_CONFIG="$HOME/.config/ghostty/config"
 } > "$GHOSTTY_CONFIG"
 log_ok "Ghostty config written to $GHOSTTY_CONFIG"
 
-# --- Step 7: Platform-Specific Setup --------------------------------------
+# --- Step 8: Platform-Specific Setup --------------------------------------
 
 if [[ "$DOTFILES_OS" == "macos" ]]; then
   if [[ -f "$REPO_DIR/scripts/macos/setup-mas-apps.sh" ]]; then
@@ -90,7 +105,7 @@ if [[ "$DOTFILES_OS" == "macos" ]]; then
   fi
 fi
 
-# --- Step 8: GitHub CLI Auth ----------------------------------------------
+# --- Step 9: GitHub CLI Auth ----------------------------------------------
 
 if command -v gh &>/dev/null; then
   if gh auth status &>/dev/null; then

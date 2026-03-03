@@ -33,7 +33,16 @@ if (-not $SkipFonts) {
     & "$RepoDir\scripts\windows\setup-fonts.ps1"
 }
 
-# Step 3: WSL
+# Step 3: Claude Code (native installer, auto-updates)
+if (Get-Command claude -ErrorAction SilentlyContinue) {
+    Write-Host "[WARN] Claude Code already installed" -ForegroundColor Yellow
+} else {
+    Write-Host "[INFO] Installing Claude Code..." -ForegroundColor Blue
+    irm https://claude.ai/install.ps1 | iex
+    Write-Host "[  OK] Claude Code installed" -ForegroundColor Green
+}
+
+# Step 4: WSL
 if (-not $SkipWSL) {
     & "$RepoDir\scripts\windows\setup-wsl.ps1"
 }

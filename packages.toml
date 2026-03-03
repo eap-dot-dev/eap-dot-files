@@ -167,4 +167,4 @@ python = "3"
 
 [pnpm-globals]
 # Packages installed globally via pnpm
-claude-code = "@anthropic-ai/claude-code"
+# (Claude Code is installed via native installer, not pnpm)
