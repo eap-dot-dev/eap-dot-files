@@ -9,7 +9,7 @@ if command -v brew &>/dev/null && [ -f "$(brew --prefix)/opt/zinit/zinit.zsh" ];
 elif [ -f "${HOME}/.local/share/zinit/zinit.zsh" ]; then
   source "${HOME}/.local/share/zinit/zinit.zsh"
 else
-  echo "Warning: Zinit not found — plugin commands won’t work."
+  echo "Warning: Zinit not found — plugin commands won't work."
 fi
 
 # ——— Initialize zsh Completion System ———
@@ -67,7 +67,11 @@ if [[ -f "${HOME}/.secrets.sh" ]]; then
 fi
 
 # pnpm
-export PNPM_HOME="/Users/epanahi/Library/pnpm"
+if [[ "$OSTYPE" == darwin* ]]; then
+  export PNPM_HOME="$HOME/Library/pnpm"
+else
+  export PNPM_HOME="$HOME/.local/share/pnpm"
+fi
 case ":$PATH:" in
   *":$PNPM_HOME:"*) ;;
   *) export PATH="$PNPM_HOME/bin:$PATH" ;;
@@ -81,4 +85,8 @@ zinit cdreplay -q
 # To customize prompt, run `p10k configure` or edit ~/.p10k.zsh.
 [[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh
 
-alias ls='ls -G'
+if [[ "$OSTYPE" == darwin* ]]; then
+  alias ls='ls -G'
+else
+  alias ls='ls --color=auto'
+fi

@@ -1,0 +1,170 @@
+# packages.toml — Unified package manifest for all platforms
+# Keys: brew, cask (macOS), apt (Debian/Ubuntu), dnf (Fedora/RHEL), winget (Windows)
+# Missing keys = silently skipped on that platform.
+
+# ─── CLI Tools ───────────────────────────────────────────────
+
+[cli.git]
+description = "Version control"
+brew = "git"
+apt = "git"
+dnf = "git"
+
+[cli.zsh]
+description = "Z shell"
+brew = "zsh"
+apt = "zsh"
+dnf = "zsh"
+
+[cli.fzf]
+description = "Fuzzy finder"
+brew = "fzf"
+apt = "fzf"
+dnf = "fzf"
+
+[cli.fd]
+description = "Fast find alternative"
+brew = "fd"
+apt = "fd-find"
+dnf = "fd-find"
+
+[cli.bat]
+description = "Cat with syntax highlighting"
+brew = "bat"
+apt = "bat"
+dnf = "bat"
+
+[cli.htop]
+description = "Interactive process viewer"
+brew = "htop"
+apt = "htop"
+dnf = "htop"
+
+[cli.ripgrep]
+description = "Fast grep alternative"
+brew = "ripgrep"
+apt = "ripgrep"
+dnf = "ripgrep"
+winget = "BurntSushi.ripgrep.MSVC"
+
+[cli.coreutils]
+description = "GNU core utilities"
+brew = "coreutils"
+# Already included on Linux
+
+[cli.curl]
+description = "HTTP client"
+brew = "curl"
+apt = "curl"
+dnf = "curl"
+
+[cli.gh]
+description = "GitHub CLI"
+brew = "gh"
+apt = "gh"
+dnf = "gh"
+# Note: apt/dnf require repo setup (handled by ensure_apt_repo/ensure_dnf_repo)
+
+[cli.mas]
+description = "Mac App Store CLI"
+brew = "mas"
+# macOS only
+
+# ─── Package / Runtime Managers ──────────────────────────────
+
+[managers.asdf]
+description = "Runtime version manager"
+brew = "asdf"
+# Linux: installed via git clone (handled in setup-asdf.sh)
+
+[managers.pnpm]
+description = "Fast Node.js package manager"
+brew = "pnpm"
+# Linux: installed via corepack or npm (handled in setup-pnpm.sh)
+
+[managers.zinit]
+description = "Zsh plugin manager"
+brew = "zinit"
+# Linux: installed via git clone (handled in setup-shell.sh)
+
+# ─── GUI Applications ───────────────────────────────────────
+
+[apps.ghostty]
+description = "GPU-accelerated terminal"
+cask = "ghostty"
+winget = "Ghostty.Ghostty"
+# Linux: installed from package repo (handled in platform script)
+
+[apps.vscode]
+description = "Code editor"
+cask = "visual-studio-code"
+winget = "Microsoft.VisualStudioCode"
+apt = "code"
+dnf = "code"
+# Note: apt/dnf require repo setup
+
+[apps.firefox]
+description = "Web browser"
+cask = "firefox"
+winget = "Mozilla.Firefox"
+apt = "firefox"
+dnf = "firefox"
+
+[apps.webstorm]
+description = "JetBrains IDE"
+cask = "webstorm"
+winget = "JetBrains.WebStorm"
+
+[apps.1password]
+description = "Password manager"
+cask = "1password"
+winget = "AgileBits.1Password"
+
+[apps.obsidian]
+description = "Knowledge base"
+cask = "obsidian"
+winget = "Obsidian.Obsidian"
+
+[apps.bettermouse]
+description = "Mouse utility"
+cask = "bettermouse"
+# macOS only
+
+[apps.betterdisplay]
+description = "Display management"
+cask = "betterdisplay"
+# macOS only
+
+[apps.bettertouchtool]
+description = "Input customization"
+cask = "bettertouchtool"
+# macOS only
+
+# ─── Fonts ───────────────────────────────────────────────────
+
+[fonts.fira-code]
+description = "Monospace programming font"
+cask = "font-fira-code"
+# Windows/Linux: handled by platform font scripts
+
+[fonts.hack-nerd-font]
+description = "Nerd font with icons"
+cask = "font-hack-nerd-font"
+# Windows/Linux: handled by platform font scripts
+
+# ─── Special Sections (handled by dedicated scripts) ─────────
+
+[mas-apps]
+# Mac App Store apps (macOS only, installed via mas)
+bettersnaptool = "417375580"
+drafts = "1435957248"
+todoist = "585829637"
+
+[asdf-runtimes]
+# Runtime versions managed by ASDF
+nodejs = "22"
+python = "3"
+
+[pnpm-globals]
+# Packages installed globally via pnpm
+claude-code = "@anthropic-ai/claude-code"
