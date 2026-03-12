@@ -58,6 +58,12 @@ brew = "curl"
 apt = "curl"
 dnf = "curl"
 
+[cli.jq]
+description = "JSON processor"
+brew = "jq"
+apt = "jq"
+dnf = "jq"
+
 [cli.gh]
 description = "GitHub CLI"
 brew = "gh"
