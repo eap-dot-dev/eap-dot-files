@@ -104,7 +104,7 @@ This approach leaves the existing `.claude/settings.local.json` (project-level p
 
 ### Installation in setup.sh
 
-Add to the symlink/config step (Step 8) in `setup.sh`:
+Add to the symlink/config step (Step 7) in `setup.sh`:
 
 1. `link_file "$DOTFILES/config/claude/statusline.sh" "$HOME/.claude/statusline.sh"` (using existing `link_file` from `lib/symlinks.sh`)
 2. `chmod +x "$HOME/.claude/statusline.sh"`
