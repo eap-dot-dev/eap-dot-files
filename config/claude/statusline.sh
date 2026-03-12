@@ -22,12 +22,22 @@ RESET=$'\033[0m'
 # --- Segment 1: Identity [Model] branch (worktree) ---
 MODEL=$(echo "$INPUT" | jq -r '.model.display_name // "Claude"')
 
-BRANCH=""
-if git rev-parse --git-dir &>/dev/null; then
-  BRANCH=$(git branch --show-current 2>/dev/null)
-fi
-
 WORKTREE=$(echo "$INPUT" | jq -r '.worktree.name // empty')
+WORKTREE_BRANCH=$(echo "$INPUT" | jq -r '.worktree.branch // empty')
+
+# When in a worktree, use the worktree's branch from JSON (the script's CWD
+# stays at the original project dir, so git commands would report the wrong branch)
+BRANCH=""
+if [[ -n "$WORKTREE_BRANCH" ]]; then
+  BRANCH="$WORKTREE_BRANCH"
+else
+  CWD=$(echo "$INPUT" | jq -r '.cwd // empty')
+  if [[ -n "$CWD" ]]; then
+    BRANCH=$(git -C "$CWD" branch --show-current 2>/dev/null)
+  elif git rev-parse --git-dir &>/dev/null; then
+    BRANCH=$(git branch --show-current 2>/dev/null)
+  fi
+fi
 
 IDENTITY="${CYAN}[${MODEL}]${RESET}"
 if [[ -n "$BRANCH" ]]; then
