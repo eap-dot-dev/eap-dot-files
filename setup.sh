@@ -82,6 +82,25 @@ link_file "$REPO_DIR/config/zsh/.zshrc" "$HOME/.zshrc"
 link_file "$REPO_DIR/config/zsh/.p10k.zsh" "$HOME/.p10k.zsh"
 link_file "$REPO_DIR/config/secrets.sh.template" "$HOME/.secrets.sh.template"
 
+# Claude Code statusline
+link_file "$REPO_DIR/config/claude/statusline.sh" "$HOME/.claude/statusline.sh"
+chmod +x "$HOME/.claude/statusline.sh"
+
+# Merge statusLine config into ~/.claude/settings.json (preserves existing keys)
+CLAUDE_SETTINGS="$HOME/.claude/settings.json"
+mkdir -p "$(dirname "$CLAUDE_SETTINGS")"
+if [[ ! -f "$CLAUDE_SETTINGS" ]]; then
+  echo '{}' > "$CLAUDE_SETTINGS"
+fi
+if command -v jq &>/dev/null; then
+  STATUSLINE_CONFIG='{"statusLine":{"type":"command","command":"~/.claude/statusline.sh"}}'
+  MERGED=$(jq -s '.[0] * .[1]' "$CLAUDE_SETTINGS" <(echo "$STATUSLINE_CONFIG"))
+  printf '%s\n' "$MERGED" > "$CLAUDE_SETTINGS"
+  log_ok "Claude Code statusline configured"
+else
+  log_warn "jq not found — skipping statusline settings merge (install jq and re-run)"
+fi
+
 # Ghostty: concatenate shared + platform-specific config
 mkdir -p "$HOME/.config/ghostty"
 GHOSTTY_CONFIG="$HOME/.config/ghostty/config"
