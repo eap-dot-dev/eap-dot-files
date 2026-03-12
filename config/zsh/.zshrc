@@ -93,3 +93,9 @@ if [[ "$OSTYPE" == darwin* ]]; then
 else
   alias ls='ls --color=auto'
 fi
+
+# Added by Antigravity
+case ":$PATH:" in
+  *":$HOME/.antigravity/antigravity/bin:"*) ;;
+  *) export PATH="$HOME/.antigravity/antigravity/bin:$PATH" ;;
+esac
