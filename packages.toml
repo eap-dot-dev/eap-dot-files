@@ -95,6 +95,11 @@ brew = "zinit"
 
 # ─── GUI Applications ───────────────────────────────────────
 
+[apps.orbstack]
+description = "Docker & Linux VM manager"
+cask = "orbstack"
+# macOS only
+
 [apps.ghostty]
 description = "GPU-accelerated terminal"
 cask = "ghostty"
