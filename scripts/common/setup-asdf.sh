@@ -39,10 +39,11 @@ if ! command -v asdf &>/dev/null; then
 fi
 
 # Plugin definitions
-plugins=( nodejs python )
+plugins=( nodejs python ruby )
 plugin_urls=(
   "https://github.com/asdf-vm/asdf-nodejs.git"
   "https://github.com/asdf-community/asdf-python.git"
+  "https://github.com/asdf-vm/asdf-ruby.git"
 )
 
 # Read version for a plugin from packages.toml [asdf-runtimes] section.

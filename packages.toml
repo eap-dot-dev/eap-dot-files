@@ -70,6 +70,12 @@ brew = "libpq"
 apt = "postgresql-client"
 dnf = "postgresql"
 
+[cli.libyaml]
+description = "YAML parser library (required to build Ruby's psych extension)"
+brew = "libyaml"
+apt = "libyaml-dev"
+dnf = "libyaml-devel"
+
 [cli.gh]
 description = "GitHub CLI"
 brew = "gh"
@@ -181,7 +187,12 @@ todoist = "585829637"
 # Runtime versions managed by ASDF
 nodejs = "22"
 python = "3"
+ruby = "3"
 
 [pnpm-globals]
 # Packages installed globally via pnpm
 # (Claude Code is installed via native installer, not pnpm)
+
+[ruby-gems]
+# Gems installed globally via asdf Ruby
+kamal = "kamal"

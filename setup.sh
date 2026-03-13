@@ -61,6 +61,10 @@ bash "$REPO_DIR/scripts/common/setup-shell.sh"
 
 bash "$REPO_DIR/scripts/common/setup-pnpm.sh"
 
+# --- Step 5b: Ruby Gems --------------------------------------------------
+
+bash "$REPO_DIR/scripts/common/setup-ruby-gems.sh"
+
 # --- Step 6: Claude Code -------------------------------------------------
 
 if [[ -x "$HOME/.local/bin/claude" ]]; then
