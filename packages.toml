@@ -64,6 +64,12 @@ brew = "jq"
 apt = "jq"
 dnf = "jq"
 
+[cli.libpq]
+description = "PostgreSQL client tools (psql, pg_dump) without full server"
+brew = "libpq"
+apt = "postgresql-client"
+dnf = "postgresql"
+
 [cli.gh]
 description = "GitHub CLI"
 brew = "gh"

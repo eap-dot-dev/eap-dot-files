@@ -81,6 +81,12 @@ case ":$PATH:" in
   *) export PATH="$HOME/.local/bin:$PATH" ;;
 esac
 
+# ——— Homebrew keg-only tools ———
+# libpq: PostgreSQL client tools (psql, pg_dump, etc.) without full server install
+if [[ -d "/opt/homebrew/opt/libpq/bin" ]]; then
+  export PATH="/opt/homebrew/opt/libpq/bin:$PATH"
+fi
+
 # ——— Replay Deferred compdef Commands ———
 zinit cdreplay -q
 
