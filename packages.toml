@@ -175,6 +175,31 @@ description = "Nerd font with icons"
 cask = "font-hack-nerd-font"
 # Windows/Linux: handled by platform font scripts
 
+# ─── Homebrew Taps (macOS only, processed before packages) ────
+
+[brew-taps]
+# Taps are added before package installation so tapped formulae resolve.
+# key = "owner/repo"
+xcodebuildmcp = "getsentry/xcodebuildmcp"
+
+# ─── macOS Developer Tools ────────────────────────────────────
+
+[cli.xcodebuildmcp]
+description = "Xcode build + iOS simulator MCP server for AI agents"
+brew = "xcodebuildmcp"
+# macOS only — requires getsentry/xcodebuildmcp tap (see [brew-taps])
+
+[cli.openjdk]
+description = "Java runtime (required by Maestro)"
+brew = "openjdk"
+apt = "default-jdk"
+dnf = "java-latest-openjdk"
+
+[cli.maestro]
+description = "Mobile E2E testing framework (YAML-based, requires Java)"
+cask = "maestro"
+# macOS only — Maestro CLI installed via cask, also needs ~/.maestro/bin on PATH
+
 # ─── Special Sections (handled by dedicated scripts) ─────────
 
 [mas-apps]
