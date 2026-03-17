@@ -9,5 +9,11 @@ font-size = 16
 window-padding-x = 8
 window-padding-y = 8
 
+# ---------- Scrollback ----------
+# Don't snap to bottom on keypress or new output while scrolled up
+scroll-to-bottom = no-keystroke,no-output
+# Effectively unlimited scrollback (10 GB, lazily allocated)
+scrollback-limit = 10000000000
+
 # ---------- Keybindings ----------
 keybind = shift+enter=text:\x1b\r
