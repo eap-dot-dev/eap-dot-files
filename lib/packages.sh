@@ -3,6 +3,35 @@
 # Source this file; do not execute directly.
 # Requires: lib/log.sh and lib/platform.sh sourced first.
 
+# Add Homebrew taps declared in [brew-taps] section of packages.toml.
+# Idempotent: already-tapped repos are skipped.
+install_brew_taps_from_toml() {
+  local toml_file="$1"
+  [[ "$DOTFILES_PKG" != "brew" ]] && return 0
+
+  local in_taps=false
+  while IFS= read -r line; do
+    [[ "$line" =~ ^[[:space:]]*# ]] && continue
+    [[ -z "${line// /}" ]] && continue
+
+    if [[ "$line" =~ ^\[([a-zA-Z0-9._-]+)\]$ ]]; then
+      [[ "${BASH_REMATCH[1]}" == "brew-taps" ]] && in_taps=true || in_taps=false
+      continue
+    fi
+
+    if $in_taps && [[ "$line" =~ ^[a-zA-Z_-]+[[:space:]]*=[[:space:]]*\"([^\"]+)\" ]]; then
+      local tap="${BASH_REMATCH[1]}"
+      if brew tap | grep -qx "$tap"; then
+        log_warn "Tap already added: $tap"
+      else
+        log_info "Adding Homebrew tap: $tap..."
+        brew tap "$tap"
+        log_ok "Tapped $tap"
+      fi
+    fi
+  done < "$toml_file"
+}
+
 # Parse packages.toml and install packages for the current platform.
 # Reads keys matching $DOTFILES_PKG (brew/apt/dnf) and "cask" (macOS only).
 install_packages_from_toml() {
@@ -17,6 +46,9 @@ install_packages_from_toml() {
     log_error "Platform not detected. Source lib/platform.sh first."
     return 1
   fi
+
+  # Process brew taps first so tapped formulae are available
+  install_brew_taps_from_toml "$toml_file"
 
   log_info "Reading package manifest: $toml_file"
 
@@ -38,7 +70,7 @@ install_packages_from_toml() {
 
     # Skip special sections (handled by their own scripts)
     case "$current_section" in
-      mas-apps|asdf-runtimes|pnpm-globals) continue ;;
+      mas-apps|asdf-runtimes|pnpm-globals|brew-taps) continue ;;
     esac
 
     # Key = "value" line

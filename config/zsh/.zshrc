@@ -108,3 +108,4 @@ esac
 
 # Fix Node.js TLS cert verification — use macOS system CA bundle
 export NODE_EXTRA_CA_CERTS=/etc/ssl/cert.pem
+export PATH=$PATH:$HOME/.maestro/bin

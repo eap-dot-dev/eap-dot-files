@@ -17,7 +17,7 @@ export DOTFILES_OS DOTFILES_DISTRO DOTFILES_PKG DOTFILES_IS_WSL DOTFILES_ARCH
 export DOTFILES_BACKUP_DIR
 export -f log_info log_ok log_warn log_error run_or_die
 export -f ensure_apt_repo ensure_dnf_repo ensure_brew
-export -f install_packages_from_toml install_pkg is_pkg_installed
+export -f install_brew_taps_from_toml install_packages_from_toml install_pkg is_pkg_installed
 export -f link_file link_config_dir
 
 echo ""
@@ -101,8 +101,20 @@ if command -v jq &>/dev/null; then
   MERGED=$(jq -s '.[0] * .[1]' "$CLAUDE_SETTINGS" <(echo "$STATUSLINE_CONFIG"))
   printf '%s\n' "$MERGED" > "$CLAUDE_SETTINGS"
   log_ok "Claude Code statusline configured"
+
+  # Merge MCP server config into ~/.claude.json (user-level, available in all projects)
+  CLAUDE_USER_CONFIG="$HOME/.claude.json"
+  if [[ ! -f "$CLAUDE_USER_CONFIG" ]]; then
+    echo '{}' > "$CLAUDE_USER_CONFIG"
+  fi
+  MCP_CONFIG_SRC="$REPO_DIR/config/claude/mcp.json"
+  if [[ -f "$MCP_CONFIG_SRC" ]]; then
+    MERGED=$(jq -s '.[0] * .[1]' "$CLAUDE_USER_CONFIG" "$MCP_CONFIG_SRC")
+    printf '%s\n' "$MERGED" > "$CLAUDE_USER_CONFIG"
+    log_ok "Claude Code MCP servers configured"
+  fi
 else
-  log_warn "jq not found — skipping statusline settings merge (install jq and re-run)"
+  log_warn "jq not found — skipping Claude Code config merge (install jq and re-run)"
 fi
 
 # Ghostty: concatenate shared + platform-specific config
