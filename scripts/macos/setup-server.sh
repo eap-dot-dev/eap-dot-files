@@ -50,6 +50,61 @@ sudo /System/Library/CoreServices/RemoteManagement/ARDAgent.app/Contents/Resourc
 
 log_ok "Remote access configured"
 
+# --- Disable mDNS on Thunderbolt (prevents "name already in use" conflicts) ---
+
+# When a Mac has multiple active interfaces, macOS advertises its Bonjour name
+# on all of them. This causes the machine to detect its own name as a conflict
+# across Thunderbolt and LAN interfaces. Fix: disable multicast on bridge ifaces.
+
+TB_MULTICAST_PLIST="/Library/LaunchDaemons/com.eap-dot-files.disable-tb-multicast.plist"
+TB_BRIDGES=()
+while IFS= read -r iface; do
+  TB_BRIDGES+=("$iface")
+done < <(ifconfig -l | tr ' ' '\n' | grep '^bridge')
+
+if [[ ${#TB_BRIDGES[@]} -gt 0 ]]; then
+  log_info "Disabling multicast on Thunderbolt bridges: ${TB_BRIDGES[*]}"
+
+  # Apply immediately
+  for iface in "${TB_BRIDGES[@]}"; do
+    sudo ifconfig "$iface" -multicast 2>/dev/null || true
+  done
+
+  # Persist via LaunchDaemon
+  MULTICAST_CMD=""
+  for iface in "${TB_BRIDGES[@]}"; do
+    MULTICAST_CMD+="ifconfig $iface -multicast; "
+  done
+
+  sudo tee "$TB_MULTICAST_PLIST" > /dev/null << EOF
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN"
+  "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+  <key>Label</key>
+  <string>com.eap-dot-files.disable-tb-multicast</string>
+  <key>ProgramArguments</key>
+  <array>
+    <string>/bin/bash</string>
+    <string>-c</string>
+    <string>${MULTICAST_CMD}</string>
+  </array>
+  <key>RunAtLoad</key>
+  <true/>
+  <key>LaunchOnlyOnce</key>
+  <true/>
+</dict>
+</plist>
+EOF
+
+  sudo launchctl unload "$TB_MULTICAST_PLIST" 2>/dev/null || true
+  sudo launchctl load "$TB_MULTICAST_PLIST"
+  log_ok "mDNS disabled on Thunderbolt bridges (prevents hostname conflicts)"
+else
+  log_warn "No bridge interfaces found — skipping mDNS fix"
+fi
+
 # --- Homelab /etc/hosts Entries -----------------------------------------------
 
 HOSTS_MARKER="# --- eap-dot-files homelab ---"
