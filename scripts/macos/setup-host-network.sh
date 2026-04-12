@@ -99,9 +99,9 @@ if [[ ${#_route_entries[@]} -gt 0 ]]; then
 </plist>
 EOF
 
-  # Load the daemon (unload first if exists)
-  sudo launchctl unload "$ROUTES_PLIST" 2>/dev/null || true
-  sudo launchctl load "$ROUTES_PLIST"
+  # Load the daemon (bootout first if exists)
+  sudo launchctl bootout system/com.eap-dot-files.routes 2>/dev/null || true
+  sudo launchctl bootstrap system "$ROUTES_PLIST"
 
   # Also apply routes immediately
   sudo bash "$ROUTE_SCRIPT"
@@ -111,6 +111,9 @@ else
 fi
 
 # --- NFS Mounts + /etc/fstab ------------------------------------------------
+
+# macOS doesn't create /etc/fstab by default — ensure it exists for grep
+[[ -f /etc/fstab ]] || sudo touch /etc/fstab
 
 FSTAB_MARKER="# --- eap-dot-files nfs ---"
 
@@ -124,9 +127,9 @@ _apply_nfs() {
   fi
 
   # Add to /etc/fstab if not already present
-  if ! grep -q "$mount_point" /etc/fstab 2>/dev/null; then
+  if ! grep -q "$mount_point" /etc/fstab; then
     # Add marker on first entry
-    if ! grep -q "$FSTAB_MARKER" /etc/fstab 2>/dev/null; then
+    if ! grep -q "$FSTAB_MARKER" /etc/fstab; then
       echo "" | sudo tee -a /etc/fstab > /dev/null
       echo "$FSTAB_MARKER" | sudo tee -a /etc/fstab > /dev/null
     fi

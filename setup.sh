@@ -13,10 +13,12 @@ DOTFILES_HOST=""
 while [[ $# -gt 0 ]]; do
   case "$1" in
     --role)
+      [[ $# -lt 2 ]] && { echo "Error: --role requires a value" >&2; exit 1; }
       DOTFILES_ROLE="$2"
       shift 2
       ;;
     --host)
+      [[ $# -lt 2 ]] && { echo "Error: --host requires a value" >&2; exit 1; }
       DOTFILES_HOST="$2"
       shift 2
       ;;
@@ -27,6 +29,11 @@ while [[ $# -gt 0 ]]; do
       ;;
   esac
 done
+
+if [[ ! "$DOTFILES_ROLE" =~ ^(workstation|server)$ ]]; then
+  echo "Error: unknown role '$DOTFILES_ROLE' (expected: workstation or server)" >&2
+  exit 1
+fi
 
 export DOTFILES_ROLE DOTFILES_HOST
 

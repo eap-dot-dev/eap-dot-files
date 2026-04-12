@@ -38,7 +38,7 @@ fi
 if sudo launchctl list 2>/dev/null | grep -q "com.apple.screensharing"; then
   log_warn "Screen Sharing already enabled"
 else
-  sudo launchctl load -w /System/Library/LaunchDaemons/com.apple.screensharing.plist 2>/dev/null || true
+  sudo launchctl bootstrap system /System/Library/LaunchDaemons/com.apple.screensharing.plist 2>/dev/null || true
   log_ok "Screen Sharing enabled"
 fi
 
@@ -98,8 +98,8 @@ if [[ ${#TB_BRIDGES[@]} -gt 0 ]]; then
 </plist>
 EOF
 
-  sudo launchctl unload "$TB_MULTICAST_PLIST" 2>/dev/null || true
-  sudo launchctl load "$TB_MULTICAST_PLIST"
+  sudo launchctl bootout system/com.eap-dot-files.disable-tb-multicast 2>/dev/null || true
+  sudo launchctl bootstrap system "$TB_MULTICAST_PLIST"
   log_ok "mDNS disabled on Thunderbolt bridges (prevents hostname conflicts)"
 else
   log_warn "No bridge interfaces found — skipping mDNS fix"
