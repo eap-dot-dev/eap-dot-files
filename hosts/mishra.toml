@@ -1,0 +1,22 @@
+# hosts/mishra.toml — M2 Ultra Mac Studio (App/dev server)
+
+[thunderbolt.tb1]
+description = "to library (NAS)"
+interface = "Thunderbolt Bridge"
+ip = "10.10.10.3"
+subnet = "255.255.255.0"
+
+[thunderbolt.tb2]
+description = "to urza"
+interface = "Thunderbolt Bridge 2"
+ip = "10.10.10.4"
+subnet = "255.255.255.0"
+
+[routes]
+# Route 10GbE subnet through library's Thunderbolt IP
+"10.10.20.0/24" = "10.10.10.11"
+
+[nfs-mounts]
+# mount_point = "nfs_host:export_path"
+"/Volumes/dev" = "10.10.10.11:/dev"
+"/Volumes/backups" = "10.10.10.11:/backups"

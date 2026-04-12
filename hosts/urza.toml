@@ -1,0 +1,26 @@
+# hosts/urza.toml — M3 Ultra Mac Studio (AI API server, local model hosting)
+
+[thunderbolt.tb1]
+description = "to library (NAS)"
+interface = "Thunderbolt Bridge"
+ip = "10.10.10.1"
+subnet = "255.255.255.0"
+
+[thunderbolt.tb2]
+description = "to mishra"
+interface = "Thunderbolt Bridge 2"
+ip = "10.10.10.2"
+subnet = "255.255.255.0"
+
+[routes]
+# Route 10GbE subnet through library's Thunderbolt IP
+"10.10.20.0/24" = "10.10.10.10"
+
+[nfs-mounts]
+# mount_point = "nfs_host:export_path"
+"/Volumes/ai-models" = "10.10.10.10:/ai-models"
+"/Volumes/datasets" = "10.10.10.10:/datasets"
+
+[sysctl]
+# IP forwarding: urza bridges WireGuard traffic to the Thunderbolt mesh
+"net.inet.ip.forwarding" = "1"
