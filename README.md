@@ -8,8 +8,8 @@ Cross-platform dotfiles and machine setup for macOS, Linux, and Windows.
 
 **Step 1** — In Terminal.app (pre-bootstrap):
 ```bash
-# Transfer or curl the init script, then:
-bash scripts/macos/setup-macos-init.sh
+# Copy/paste the contents of scripts/macos/setup-macos-init.sh into Terminal
+# (the script is self-contained — no git or dependencies needed)
 ```
 
 **Step 2** — In Ghostty:

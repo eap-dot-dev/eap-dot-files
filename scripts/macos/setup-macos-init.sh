@@ -3,11 +3,19 @@ set -euo pipefail
 
 # scripts/macos/setup-macos-init.sh — Pre-bootstrap for fresh macOS machines
 # Run this in Terminal.app before opening Ghostty.
-# This script is self-contained (sources its own libs).
+# Self-contained: can be copy/pasted or curl'd onto a bare machine.
 
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-REPO_DIR="$(cd "$SCRIPT_DIR/../.." && pwd)"
-source "$REPO_DIR/lib/log.sh"
+# --- Inline logging (no external dependencies) ------------------------------
+log_info()  { printf '\033[0;34m[INFO]\033[0m %s\n' "$*"; }
+log_ok()    { printf '\033[0;32m[  OK]\033[0m %s\n' "$*"; }
+log_warn()  { printf '\033[0;33m[WARN]\033[0m %s\n' "$*"; }
+log_error() { printf '\033[0;31m[ ERR]\033[0m %s\n' "$*" >&2; }
+run_or_die() {
+  local description="$1"; shift
+  log_info "$description"
+  if "$@"; then log_ok "$description"
+  else log_error "$description failed (exit code $?)"; exit 1; fi
+}
 
 # Set hostname
 read -rp "Enter your desired hostname: " NEW_HOSTNAME
