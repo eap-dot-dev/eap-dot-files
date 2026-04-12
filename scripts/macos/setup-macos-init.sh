@@ -75,4 +75,6 @@ else
   log_warn "Repository already exists at ${DEV_DIR}/eap-dot-files"
 fi
 
-log_ok "Pre-bootstrap done. Now launch Ghostty and run: bash setup.sh"
+log_ok "Pre-bootstrap done. Now launch Ghostty and run:"
+log_info "  Workstation: bash setup.sh"
+log_info "  Server:      bash setup.sh --role server --host <hostname>"
