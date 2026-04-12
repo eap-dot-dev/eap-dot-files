@@ -18,6 +18,21 @@ cd ~/Development/eap-dot-files
 bash setup.sh
 ```
 
+### macOS Server (Mac Studios)
+
+After the standard Quick Start above, re-run with server flags:
+```bash
+cd ~/Development/eap-dot-files
+bash setup.sh --role server --host urza    # on M3 Ultra
+bash setup.sh --role server --host mishra  # on M2 Ultra
+```
+
+This layers server config on top of the workstation setup:
+- Always-on power (sleep disabled, auto-restart)
+- Remote access (SSH, Screen Sharing, ARD)
+- Homelab `/etc/hosts` entries
+- Per-host Thunderbolt static IPs, static routes, NFS mounts
+
 ### Linux (Ubuntu/Debian or Fedora/RHEL)
 
 ```bash
@@ -66,6 +81,7 @@ scripts/common/       # Cross-platform setup steps
 scripts/macos/        # macOS-specific setup
 scripts/linux/        # Linux-specific setup
 scripts/windows/      # Windows PowerShell scripts
+hosts/                # Per-host network config (server role)
 ```
 
 ## Customization
@@ -75,6 +91,7 @@ scripts/windows/      # Windows PowerShell scripts
 - **Shell config**: Edit `config/zsh/.zshrc`
 - **Terminal config**: Edit `config/ghostty/config` (shared) or `config.macos`/`config.linux` (platform-specific)
 - **Secrets**: Copy `~/.secrets.sh.template` to `~/.secrets.sh` and fill in values
+- **Server hosts**: Edit `hosts/<hostname>.toml` for per-machine network config
 
 ## Re-running
 
