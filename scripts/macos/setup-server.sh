@@ -116,10 +116,10 @@ else
 
 # --- eap-dot-files homelab ---
 # LAN
-192.168.86.101  urza      urza.lab
-192.168.86.102  mishra    mishra.lab
-192.168.86.103  emrakul   emrakul.lab
-192.168.86.104  library   library.lab
+192.168.29.101  urza      urza.lab
+192.168.29.102  mishra    mishra.lab
+192.168.29.103  emrakul   emrakul.lab
+192.168.29.104  library   library.lab
 
 # Thunderbolt mesh
 10.10.10.1   urza-tb1
