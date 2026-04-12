@@ -35,6 +35,7 @@ source "$REPO_DIR/lib/log.sh"
 source "$REPO_DIR/lib/platform.sh"
 source "$REPO_DIR/lib/symlinks.sh"
 source "$REPO_DIR/lib/packages.sh"
+source "$REPO_DIR/lib/hosts.sh"
 
 # Export variables and functions for subscripts called via bash
 export DOTFILES_OS DOTFILES_DISTRO DOTFILES_PKG DOTFILES_IS_WSL DOTFILES_ARCH
@@ -43,6 +44,7 @@ export -f log_info log_ok log_warn log_error run_or_die
 export -f ensure_apt_repo ensure_dnf_repo ensure_brew
 export -f install_brew_taps_from_toml install_packages_from_toml install_pkg is_pkg_installed
 export -f link_file link_config_dir
+export -f parse_host_section
 
 echo ""
 log_info "=== eap-dot-files setup ==="
