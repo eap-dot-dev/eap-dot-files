@@ -6,6 +6,30 @@ set -euo pipefail
 
 REPO_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
+# Parse arguments
+DOTFILES_ROLE="workstation"
+DOTFILES_HOST=""
+
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    --role)
+      DOTFILES_ROLE="$2"
+      shift 2
+      ;;
+    --host)
+      DOTFILES_HOST="$2"
+      shift 2
+      ;;
+    *)
+      echo "Unknown option: $1" >&2
+      echo "Usage: setup.sh [--role workstation|server] [--host hostname]" >&2
+      exit 1
+      ;;
+  esac
+done
+
+export DOTFILES_ROLE DOTFILES_HOST
+
 # Source shared libraries
 source "$REPO_DIR/lib/log.sh"
 source "$REPO_DIR/lib/platform.sh"
@@ -22,7 +46,7 @@ export -f link_file link_config_dir
 
 echo ""
 log_info "=== eap-dot-files setup ==="
-log_info "OS: $DOTFILES_OS | Distro: $DOTFILES_DISTRO | Pkg: $DOTFILES_PKG | WSL: $DOTFILES_IS_WSL | Arch: $DOTFILES_ARCH"
+log_info "OS: $DOTFILES_OS | Distro: $DOTFILES_DISTRO | Pkg: $DOTFILES_PKG | WSL: $DOTFILES_IS_WSL | Arch: $DOTFILES_ARCH | Role: $DOTFILES_ROLE | Host: ${DOTFILES_HOST:-none}"
 echo ""
 
 # --- Step 1: Platform Package Manager ------------------------------------
@@ -148,6 +172,23 @@ if command -v gh &>/dev/null; then
   else
     log_info "Not authenticated with GitHub, running gh auth login..."
     gh auth login
+  fi
+fi
+
+# --- Step 10: Server Role Setup ---------------------------------------------
+
+if [[ "$DOTFILES_ROLE" == "server" ]] && [[ "$DOTFILES_OS" == "macos" ]]; then
+  bash "$REPO_DIR/scripts/macos/setup-server.sh"
+
+  if [[ -n "$DOTFILES_HOST" ]]; then
+    if [[ -f "$REPO_DIR/hosts/${DOTFILES_HOST}.toml" ]]; then
+      bash "$REPO_DIR/scripts/macos/setup-host-network.sh" "$REPO_DIR/hosts/${DOTFILES_HOST}.toml"
+    else
+      log_error "Host config not found: hosts/${DOTFILES_HOST}.toml"
+      exit 1
+    fi
+  else
+    log_warn "No --host specified, skipping host-specific network config"
   fi
 fi
 
