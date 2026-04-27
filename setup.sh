@@ -3,6 +3,15 @@ set -euo pipefail
 
 # setup.sh — Main entry point for macOS, Linux, and WSL setup
 # Idempotent: safe to run repeatedly.
+#
+# NOTE: Per-host network provisioning (Thunderbolt IPs, NFS mounts, routes)
+# has moved out of this repo. It now lives in the sibling epanahi.cloud
+# repository. The --host flag is still accepted for backward compatibility
+# but is now ignored for network provisioning. Use:
+#
+#   cd ~/Development/epanahi.cloud && bash bootstrap.sh
+#
+# to apply homelab-specific host config after this setup runs.
 
 REPO_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
@@ -42,7 +51,6 @@ source "$REPO_DIR/lib/log.sh"
 source "$REPO_DIR/lib/platform.sh"
 source "$REPO_DIR/lib/symlinks.sh"
 source "$REPO_DIR/lib/packages.sh"
-source "$REPO_DIR/lib/hosts.sh"
 
 # Export variables and functions for subscripts called via bash
 export DOTFILES_OS DOTFILES_DISTRO DOTFILES_PKG DOTFILES_IS_WSL DOTFILES_ARCH
@@ -51,11 +59,15 @@ export -f log_info log_ok log_warn log_error run_or_die
 export -f ensure_apt_repo ensure_dnf_repo ensure_brew
 export -f install_brew_taps_from_toml install_packages_from_toml install_pkg is_pkg_installed
 export -f link_file link_config_dir
-export -f parse_host_section
 
 echo ""
 log_info "=== eap-dot-files setup ==="
 log_info "OS: $DOTFILES_OS | Distro: $DOTFILES_DISTRO | Pkg: $DOTFILES_PKG | WSL: $DOTFILES_IS_WSL | Arch: $DOTFILES_ARCH | Role: $DOTFILES_ROLE | Host: ${DOTFILES_HOST:-none}"
+if [[ -n "$DOTFILES_HOST" ]]; then
+  log_warn "--host is deprecated; homelab network config has moved to the"
+  log_warn "  sibling epanahi.cloud repo. Run 'bash bootstrap.sh' in that"
+  log_warn "  repo after this setup completes."
+fi
 echo ""
 
 # --- Step 1: Platform Package Manager ------------------------------------
@@ -189,16 +201,11 @@ fi
 if [[ "$DOTFILES_ROLE" == "server" ]] && [[ "$DOTFILES_OS" == "macos" ]]; then
   bash "$REPO_DIR/scripts/macos/setup-server.sh"
 
-  if [[ -n "$DOTFILES_HOST" ]]; then
-    if [[ -f "$REPO_DIR/hosts/${DOTFILES_HOST}.toml" ]]; then
-      bash "$REPO_DIR/scripts/macos/setup-host-network.sh" "$REPO_DIR/hosts/${DOTFILES_HOST}.toml"
-    else
-      log_error "Host config not found: hosts/${DOTFILES_HOST}.toml"
-      exit 1
-    fi
-  else
-    log_warn "No --host specified, skipping host-specific network config"
-  fi
+  # Per-host network config has migrated to the epanahi.cloud repo.
+  # Run its bootstrap (or per-role provision script) after this setup.
+  log_info "Server-layer base setup complete."
+  log_info "For per-host homelab config (Thunderbolt IPs, NFS, launchd),"
+  log_info "run:  cd ~/Development/epanahi.cloud && bash bootstrap.sh"
 fi
 
 # --- Done -----------------------------------------------------------------

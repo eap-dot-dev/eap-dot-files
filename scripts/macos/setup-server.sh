@@ -105,36 +105,8 @@ else
   log_warn "No bridge interfaces found — skipping mDNS fix"
 fi
 
-# --- Homelab /etc/hosts Entries -----------------------------------------------
-
-HOSTS_MARKER="# --- eap-dot-files homelab ---"
-if grep -q "$HOSTS_MARKER" /etc/hosts 2>/dev/null; then
-  log_warn "Homelab hosts entries already present in /etc/hosts"
-else
-  log_info "Adding homelab entries to /etc/hosts..."
-  sudo tee -a /etc/hosts > /dev/null << 'EOF'
-
-# --- eap-dot-files homelab ---
-# LAN
-192.168.29.101  urza      urza.lab
-192.168.29.102  mishra    mishra.lab
-192.168.29.103  emrakul   emrakul.lab
-192.168.29.104  library   library.lab
-
-# Thunderbolt mesh
-10.10.10.1   urza-tb1
-10.10.10.2   urza-tb2
-10.10.10.3   mishra-tb1
-10.10.10.4   mishra-tb2
-10.10.10.10  library-tb1
-10.10.10.11  library-tb2
-
-# 10GbE
-10.10.20.10  library-10g
-10.10.20.50  emrakul-10g
-# --- end eap-dot-files homelab ---
-EOF
-  log_ok "Homelab hosts entries added to /etc/hosts"
-fi
+# Name resolution for homelab hosts is handled by Tailscale MagicDNS +
+# NextDNS rewrites for *.epanahi.cloud (configured in the sibling
+# epanahi.cloud repo). No /etc/hosts entries are written here.
 
 log_ok "Server setup complete"
