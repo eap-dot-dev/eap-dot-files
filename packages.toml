@@ -83,6 +83,13 @@ apt = "gh"
 dnf = "gh"
 # Note: apt/dnf require repo setup (handled by ensure_apt_repo/ensure_dnf_repo)
 
+[cli.op]
+description = "1Password CLI — read secrets from vaults via op:// refs"
+cask = "1password-cli"
+apt = "1password-cli"
+dnf = "1password-cli"
+# Note: apt/dnf require 1Password's package repo. CachyOS/Arch via AUR (1password-cli).
+
 [cli.mas]
 description = "Mac App Store CLI"
 brew = "mas"
@@ -111,6 +118,15 @@ brew = "zinit"
 description = "Docker & Linux VM manager"
 cask = "orbstack"
 # macOS only
+
+[apps.tailscale]
+description = "Mesh VPN — GUI app on macOS (cask bundles the CLI on PATH)"
+cask = "tailscale-app"
+apt = "tailscale"
+dnf = "tailscale"
+# Note: apt/dnf require the official Tailscale repo (https://pkgs.tailscale.com/).
+# CachyOS / Arch on kaladesh installs via provision/kaladesh/02-tailscale.sh.
+# QNAP dominaria installs via QPKG (App Center).
 
 [apps.ghostty]
 description = "GPU-accelerated terminal"
