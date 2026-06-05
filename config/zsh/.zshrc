@@ -63,6 +63,17 @@ if [[ -f "${HOME}/.secrets.sh" ]]; then
   source "${HOME}/.secrets.sh"
 fi
 
+# ——— Work Environment ———
+DOTFILES_DIR="${HOME}/Development/eap-dot-files"
+if [[ -f "${DOTFILES_DIR}/config/zsh/work.zsh" ]]; then
+  source "${DOTFILES_DIR}/config/zsh/work.zsh"
+fi
+
+# ——— OrbStack ———
+if [[ -f "${HOME}/.orbstack/shell/init.zsh" ]]; then
+  source "${HOME}/.orbstack/shell/init.zsh" 2>/dev/null
+fi
+
 # pnpm
 if [[ "$OSTYPE" == darwin* ]]; then
   export PNPM_HOME="$HOME/Library/pnpm"

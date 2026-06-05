@@ -3,48 +3,41 @@ set -euo pipefail
 
 # setup.sh — Main entry point for macOS, Linux, and WSL setup
 # Idempotent: safe to run repeatedly.
-#
-# NOTE: Per-host network provisioning (Thunderbolt IPs, NFS mounts, routes)
-# has moved out of this repo. It now lives in the sibling epanahi.cloud
-# repository. The --host flag is still accepted for backward compatibility
-# but is now ignored for network provisioning. Use:
-#
-#   cd ~/Development/epanahi.cloud && bash bootstrap.sh
-#
-# to apply homelab-specific host config after this setup runs.
+# Prompts for machine context (work/personal/server) at startup.
 
 REPO_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
-# Parse arguments
-DOTFILES_ROLE="workstation"
-DOTFILES_HOST=""
+# --- Interactive Context Selection -------------------------------------------
 
-while [[ $# -gt 0 ]]; do
-  case "$1" in
-    --role)
-      [[ $# -lt 2 ]] && { echo "Error: --role requires a value" >&2; exit 1; }
-      DOTFILES_ROLE="$2"
-      shift 2
-      ;;
-    --host)
-      [[ $# -lt 2 ]] && { echo "Error: --host requires a value" >&2; exit 1; }
-      DOTFILES_HOST="$2"
-      shift 2
-      ;;
-    *)
-      echo "Unknown option: $1" >&2
-      echo "Usage: setup.sh [--role workstation|server] [--host hostname]" >&2
-      exit 1
-      ;;
+echo ""
+echo "What kind of machine is this?"
+echo "  1) work       — Work laptop (skip personal MCP servers, preserve Claude settings)"
+echo "  2) personal   — Personal workstation (full setup incl. XcodeBuildMCP)"
+echo "  3) server     — Headless server (no GUI apps, no Claude)"
+echo ""
+while true; do
+  printf "Select [1-3]: "
+  read -r choice
+  case "$choice" in
+    1) DOTFILES_CONTEXT="work";     DOTFILES_ROLE="workstation"; break ;;
+    2) DOTFILES_CONTEXT="personal"; DOTFILES_ROLE="workstation"; break ;;
+    3) DOTFILES_CONTEXT="server";   DOTFILES_ROLE="server";      break ;;
+    *) echo "  Invalid choice, try again." ;;
   esac
 done
+echo ""
 
-if [[ ! "$DOTFILES_ROLE" =~ ^(workstation|server)$ ]]; then
-  echo "Error: unknown role '$DOTFILES_ROLE' (expected: workstation or server)" >&2
-  exit 1
-fi
+export DOTFILES_CONTEXT DOTFILES_ROLE
 
-export DOTFILES_ROLE DOTFILES_HOST
+# Legacy flags (ignored but accepted for backward compat)
+DOTFILES_HOST=""
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    --role|--host) shift 2 ;;
+    *) shift ;;
+  esac
+done
+export DOTFILES_HOST
 
 # Source shared libraries
 source "$REPO_DIR/lib/log.sh"
@@ -62,13 +55,29 @@ export -f link_file link_config_dir
 
 echo ""
 log_info "=== eap-dot-files setup ==="
-log_info "OS: $DOTFILES_OS | Distro: $DOTFILES_DISTRO | Pkg: $DOTFILES_PKG | WSL: $DOTFILES_IS_WSL | Arch: $DOTFILES_ARCH | Role: $DOTFILES_ROLE | Host: ${DOTFILES_HOST:-none}"
-if [[ -n "$DOTFILES_HOST" ]]; then
-  log_warn "--host is deprecated; homelab network config has moved to the"
-  log_warn "  sibling epanahi.cloud repo. Run 'bash bootstrap.sh' in that"
-  log_warn "  repo after this setup completes."
-fi
+log_info "OS: $DOTFILES_OS | Distro: $DOTFILES_DISTRO | Pkg: $DOTFILES_PKG | WSL: $DOTFILES_IS_WSL | Arch: $DOTFILES_ARCH | Context: $DOTFILES_CONTEXT"
 echo ""
+
+# --- Step 0: Hostname (macOS, workstation/work) ---------------------------
+
+if [[ "$DOTFILES_OS" == "macos" && "$DOTFILES_CONTEXT" != "server" ]]; then
+  CURRENT_HOSTNAME="$(scutil --get ComputerName 2>/dev/null || hostname -s)"
+  printf 'Current hostname: %s\n' "$CURRENT_HOSTNAME"
+  printf 'Enter new hostname (or press Enter to keep "%s"): ' "$CURRENT_HOSTNAME"
+  read -r NEW_HOSTNAME
+  if [[ -n "$NEW_HOSTNAME" && "$NEW_HOSTNAME" != "$CURRENT_HOSTNAME" ]]; then
+    log_info "Setting hostname to ${NEW_HOSTNAME}..."
+    sudo scutil --set ComputerName "$NEW_HOSTNAME"
+    sudo scutil --set HostName "$NEW_HOSTNAME"
+    sudo scutil --set LocalHostName "$NEW_HOSTNAME"
+    sudo sed -i '' "s/127\.0\.0\.1.*$/127.0.0.1 localhost ${NEW_HOSTNAME}/" /etc/hosts || true
+    log_ok "Hostname set to ${NEW_HOSTNAME}"
+  else
+    log_warn "Keeping hostname: ${CURRENT_HOSTNAME}"
+  fi
+elif [[ "$DOTFILES_OS" == "linux" && "$DOTFILES_CONTEXT" != "server" ]]; then
+  bash "$REPO_DIR/scripts/linux/setup-hostname.sh"
+fi
 
 # --- Step 1: Platform Package Manager ------------------------------------
 
@@ -112,14 +121,16 @@ bash "$REPO_DIR/scripts/common/setup-ruby-gems.sh"
 
 # --- Step 6: Claude Code -------------------------------------------------
 
-if [[ -x "$HOME/.local/bin/claude" ]]; then
-  log_warn "Claude Code already installed"
-else
-  log_info "Installing Claude Code via native installer..."
-  if curl -fsSL https://claude.ai/install.sh | bash; then
-    log_ok "Claude Code installed"
+if [[ "$DOTFILES_CONTEXT" != "server" ]]; then
+  if [[ -x "$HOME/.local/bin/claude" ]]; then
+    log_warn "Claude Code already installed"
   else
-    log_warn "Claude Code install failed (network issue?) — install manually: curl -fsSL https://claude.ai/install.sh | bash"
+    log_info "Installing Claude Code via native installer..."
+    if curl -fsSL https://claude.ai/install.sh | bash; then
+      log_ok "Claude Code installed"
+    else
+      log_warn "Claude Code install failed (network issue?) — install manually: curl -fsSL https://claude.ai/install.sh | bash"
+    fi
   fi
 fi
 
@@ -131,35 +142,40 @@ link_file "$REPO_DIR/config/zsh/.zshrc" "$HOME/.zshrc"
 link_file "$REPO_DIR/config/zsh/.p10k.zsh" "$HOME/.p10k.zsh"
 link_file "$REPO_DIR/config/secrets.sh.template" "$HOME/.secrets.sh.template"
 
-# Claude Code statusline
-link_file "$REPO_DIR/config/claude/statusline.sh" "$HOME/.claude/statusline.sh"
-chmod +x "$HOME/.claude/statusline.sh"
+# Claude Code statusline (universal)
+if [[ "$DOTFILES_CONTEXT" != "server" ]]; then
+  link_file "$REPO_DIR/config/claude/statusline.sh" "$HOME/.claude/statusline.sh"
+  chmod +x "$HOME/.claude/statusline.sh"
 
-# Merge statusLine config into ~/.claude/settings.json (preserves existing keys)
-CLAUDE_SETTINGS="$HOME/.claude/settings.json"
-mkdir -p "$(dirname "$CLAUDE_SETTINGS")"
-if [[ ! -f "$CLAUDE_SETTINGS" ]]; then
-  echo '{}' > "$CLAUDE_SETTINGS"
+  CLAUDE_SETTINGS="$HOME/.claude/settings.json"
+  mkdir -p "$(dirname "$CLAUDE_SETTINGS")"
+  if [[ ! -f "$CLAUDE_SETTINGS" ]]; then
+    echo '{}' > "$CLAUDE_SETTINGS"
+  fi
+  if command -v jq &>/dev/null; then
+    STATUSLINE_CONFIG='{"statusLine":{"type":"command","command":"~/.claude/statusline.sh"}}'
+    MERGED=$(jq -s '.[0] * .[1]' "$CLAUDE_SETTINGS" <(echo "$STATUSLINE_CONFIG"))
+    printf '%s\n' "$MERGED" > "$CLAUDE_SETTINGS"
+    log_ok "Claude Code statusline configured"
+  else
+    log_warn "jq not found — skipping Claude Code statusline merge"
+  fi
 fi
-if command -v jq &>/dev/null; then
-  STATUSLINE_CONFIG='{"statusLine":{"type":"command","command":"~/.claude/statusline.sh"}}'
-  MERGED=$(jq -s '.[0] * .[1]' "$CLAUDE_SETTINGS" <(echo "$STATUSLINE_CONFIG"))
-  printf '%s\n' "$MERGED" > "$CLAUDE_SETTINGS"
-  log_ok "Claude Code statusline configured"
 
-  # Merge MCP server config into ~/.claude.json (user-level, available in all projects)
-  CLAUDE_USER_CONFIG="$HOME/.claude.json"
-  if [[ ! -f "$CLAUDE_USER_CONFIG" ]]; then
-    echo '{}' > "$CLAUDE_USER_CONFIG"
+# Claude Code MCP servers (personal only — work machines manage their own)
+if [[ "$DOTFILES_CONTEXT" == "personal" ]]; then
+  if command -v jq &>/dev/null; then
+    CLAUDE_USER_CONFIG="$HOME/.claude.json"
+    if [[ ! -f "$CLAUDE_USER_CONFIG" ]]; then
+      echo '{}' > "$CLAUDE_USER_CONFIG"
+    fi
+    MCP_CONFIG_SRC="$REPO_DIR/config/claude/mcp.json"
+    if [[ -f "$MCP_CONFIG_SRC" ]]; then
+      MERGED=$(jq -s '.[0] * .[1]' "$CLAUDE_USER_CONFIG" "$MCP_CONFIG_SRC")
+      printf '%s\n' "$MERGED" > "$CLAUDE_USER_CONFIG"
+      log_ok "Claude Code MCP servers configured (personal)"
+    fi
   fi
-  MCP_CONFIG_SRC="$REPO_DIR/config/claude/mcp.json"
-  if [[ -f "$MCP_CONFIG_SRC" ]]; then
-    MERGED=$(jq -s '.[0] * .[1]' "$CLAUDE_USER_CONFIG" "$MCP_CONFIG_SRC")
-    printf '%s\n' "$MERGED" > "$CLAUDE_USER_CONFIG"
-    log_ok "Claude Code MCP servers configured"
-  fi
-else
-  log_warn "jq not found — skipping Claude Code config merge (install jq and re-run)"
 fi
 
 # Ghostty: concatenate shared + platform-specific config
@@ -198,11 +214,9 @@ fi
 
 # --- Step 10: Server Role Setup ---------------------------------------------
 
-if [[ "$DOTFILES_ROLE" == "server" ]] && [[ "$DOTFILES_OS" == "macos" ]]; then
+if [[ "$DOTFILES_CONTEXT" == "server" ]] && [[ "$DOTFILES_OS" == "macos" ]]; then
   bash "$REPO_DIR/scripts/macos/setup-server.sh"
 
-  # Per-host network config has migrated to the epanahi.cloud repo.
-  # Run its bootstrap (or per-role provision script) after this setup.
   log_info "Server-layer base setup complete."
   log_info "For per-host homelab config (Thunderbolt IPs, NFS, launchd),"
   log_info "run:  cd ~/Development/epanahi.cloud && bash bootstrap.sh"
