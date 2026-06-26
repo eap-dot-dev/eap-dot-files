@@ -134,6 +134,21 @@ if [[ "$DOTFILES_CONTEXT" != "server" ]]; then
   fi
 fi
 
+# --- Step 6b: Persist machine context -------------------------------------
+# DOTFILES_CONTEXT only lives for the duration of this script. The interactive
+# shell needs it too, so it can decide whether to source work-only config
+# (work.zsh). Persist the choice to an XDG-conventional, sourceable env file.
+
+CONTEXT_DIR="${XDG_CONFIG_HOME:-$HOME/.config}/dotfiles"
+mkdir -p "$CONTEXT_DIR"
+cat > "$CONTEXT_DIR/context.env" <<EOF
+# Written by eap-dot-files setup.sh — do not edit by hand.
+# Re-run setup.sh to change this machine's context.
+DOTFILES_CONTEXT=$DOTFILES_CONTEXT
+DOTFILES_ROLE=$DOTFILES_ROLE
+EOF
+log_ok "Machine context persisted: $DOTFILES_CONTEXT -> $CONTEXT_DIR/context.env"
+
 # --- Step 7: Symlink Configs ---------------------------------------------
 
 log_info "Linking configuration files..."

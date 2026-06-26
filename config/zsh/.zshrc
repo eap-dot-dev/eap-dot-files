@@ -63,9 +63,20 @@ if [[ -f "${HOME}/.secrets.sh" ]]; then
   source "${HOME}/.secrets.sh"
 fi
 
+# ——— Claude Code (base) ———
+# Convenience alias available on every machine. On work machines, work.zsh is
+# sourced afterward and overrides `claude`/`claude-auto` with Bedrock + AWS env.
+alias claude-auto='claude --dangerously-skip-permissions'
+
 # ——— Work Environment ———
+# work.zsh sets AWS defaults and Bedrock-backed Claude aliases. Only source it
+# on machines explicitly set up as "work" — the context is persisted by
+# setup.sh to context.env. Personal/server machines never load it, so `claude`
+# resolves to the normal binary (claude.ai auth).
 DOTFILES_DIR="${HOME}/Development/eap-dot-files"
-if [[ -f "${DOTFILES_DIR}/config/zsh/work.zsh" ]]; then
+DOTFILES_CONTEXT_FILE="${XDG_CONFIG_HOME:-$HOME/.config}/dotfiles/context.env"
+[[ -f "$DOTFILES_CONTEXT_FILE" ]] && source "$DOTFILES_CONTEXT_FILE"
+if [[ "${DOTFILES_CONTEXT:-}" == "work" && -f "${DOTFILES_DIR}/config/zsh/work.zsh" ]]; then
   source "${DOTFILES_DIR}/config/zsh/work.zsh"
 fi
 
