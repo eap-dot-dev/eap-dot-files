@@ -97,11 +97,12 @@ case ":$PATH:" in
 esac
 # pnpm end
 
-# ——— Local binaries (Claude Code, etc.) ———
-case ":$PATH:" in
-  *":$HOME/.local/bin:"*) ;;
-  *) export PATH="$HOME/.local/bin:$PATH" ;;
-esac
+# ——— Local binaries (native Claude Code, etc.) ———
+# Prepend unconditionally and de-dupe so ~/.local/bin wins over ~/.asdf/shims.
+# asdf (sourced above) prepends its shim dir, and a stale npm-global Claude Code
+# would otherwise shadow the native install in ~/.local/bin. Reordering here —
+# rather than add-if-missing — guarantees the native `claude` resolves first.
+path=("$HOME/.local/bin" ${path:#"$HOME/.local/bin"})
 
 # ——— Homebrew keg-only tools ———
 # libpq: PostgreSQL client tools (psql, pg_dump, etc.) without full server install

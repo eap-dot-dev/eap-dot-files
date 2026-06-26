@@ -122,8 +122,22 @@ bash "$REPO_DIR/scripts/common/setup-ruby-gems.sh"
 # --- Step 6: Claude Code -------------------------------------------------
 
 if [[ "$DOTFILES_CONTEXT" != "server" ]]; then
+  # Remove any npm-global Claude Code — it predates the native installer and,
+  # via the asdf node shim, shadows ~/.local/bin/claude in PATH. The native
+  # install below is the supported one; the npm package must not linger.
+  for npm_bin in npm pnpm; do
+    if command -v "$npm_bin" &>/dev/null \
+       && "$npm_bin" ls -g --depth=0 2>/dev/null | grep -q "@anthropic-ai/claude-code"; then
+      log_info "Removing npm-global Claude Code installed via ${npm_bin}..."
+      "$npm_bin" rm -g @anthropic-ai/claude-code &>/dev/null \
+        && log_ok "Removed npm-global Claude Code (${npm_bin})" \
+        || log_warn "Could not remove npm-global Claude Code (${npm_bin}) — remove manually"
+    fi
+  done
+  command -v asdf &>/dev/null && asdf reshim nodejs &>/dev/null || true
+
   if [[ -x "$HOME/.local/bin/claude" ]]; then
-    log_warn "Claude Code already installed"
+    log_warn "Claude Code already installed (native)"
   else
     log_info "Installing Claude Code via native installer..."
     if curl -fsSL https://claude.ai/install.sh | bash; then
