@@ -68,6 +68,10 @@ fi
 # sourced afterward and overrides `claude`/`claude-auto` with Bedrock + AWS env.
 alias claude-auto='claude --dangerously-skip-permissions'
 
+# ——— Codex (base) ———
+# Provider selection remains machine-local in ~/.codex/config.toml.
+alias codex-auto='codex --yolo'
+
 # ——— Work Environment ———
 # work.zsh sets AWS defaults and Bedrock-backed Claude aliases. Only source it
 # on machines explicitly set up as "work" — the context is persisted by

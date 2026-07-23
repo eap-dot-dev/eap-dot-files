@@ -10,3 +10,8 @@ export AWS_PROFILE="twl-tst"
 # Uses twl-srd profile for Bedrock access
 alias claude='AWS_PROFILE=twl-srd CLAUDE_CODE_USE_BEDROCK=1 command claude'
 alias claude-auto='AWS_PROFILE=twl-srd CLAUDE_CODE_USE_BEDROCK=1 command claude --dangerously-skip-permissions'
+
+# ——— Codex ———
+# Bedrock is configured locally in ~/.codex/config.toml, not in dotfiles.
+alias codex='command codex'
+alias codex-auto='command codex --yolo'
