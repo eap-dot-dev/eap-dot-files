@@ -211,6 +211,11 @@ brew = "openjdk"
 apt = "default-jdk"
 dnf = "java-latest-openjdk"
 
+[cli.agent-browser]
+description = "Fast browser automation CLI for AI agents (CDP-based, no Playwright dep)"
+brew = "agent-browser"
+# macOS only — post-install requires: agent-browser install
+
 [cli.maestro]
 description = "Mobile E2E testing framework (YAML-based, requires Java)"
 cask = "maestro"

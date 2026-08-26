@@ -119,6 +119,16 @@ bash "$REPO_DIR/scripts/common/setup-pnpm.sh"
 
 bash "$REPO_DIR/scripts/common/setup-ruby-gems.sh"
 
+# --- Step 5c: agent-browser post-install ----------------------------------
+
+if command -v agent-browser &>/dev/null; then
+  log_info "Running agent-browser install (idempotent)..."
+  agent-browser install && log_ok "agent-browser install complete" \
+    || log_warn "agent-browser install failed — run manually: agent-browser install"
+else
+  log_warn "agent-browser not found after package install — skipping post-install"
+fi
+
 # --- Step 6: Claude Code -------------------------------------------------
 
 if [[ "$DOTFILES_CONTEXT" != "server" ]]; then
@@ -205,6 +215,24 @@ if [[ "$DOTFILES_CONTEXT" == "personal" ]]; then
       log_ok "Claude Code MCP servers configured (personal)"
     fi
   fi
+fi
+
+# Claude Code user-level CLAUDE.md
+CLAUDE_MD_SRC="$REPO_DIR/config/claude/CLAUDE.md"
+CLAUDE_MD_DST="$HOME/.claude/CLAUDE.md"
+if [[ -f "$CLAUDE_MD_SRC" ]]; then
+  mkdir -p "$HOME/.claude"
+  cp "$CLAUDE_MD_SRC" "$CLAUDE_MD_DST"
+  log_ok "Claude Code user CLAUDE.md deployed"
+fi
+
+# Codex CLI user-level AGENTS.md
+CODEX_AGENTS_SRC="$REPO_DIR/config/codex/AGENTS.md"
+CODEX_AGENTS_DST="$HOME/.codex/AGENTS.md"
+if [[ -f "$CODEX_AGENTS_SRC" ]]; then
+  mkdir -p "$HOME/.codex"
+  cp "$CODEX_AGENTS_SRC" "$CODEX_AGENTS_DST"
+  log_ok "Codex CLI user AGENTS.md deployed"
 fi
 
 # Ghostty: concatenate shared + platform-specific config
