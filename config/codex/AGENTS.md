@@ -1,4 +1,34 @@
-# Browser automation: use agent-browser
+# Standing guidance
+
+## Never leave a process running that nothing will stop
+
+A background process must carry its own bound. Do not rely on a cleanup line later in the
+script — if the shell wrapper is orphaned, killed, or the session ends first, that line never
+runs and the process survives indefinitely.
+
+**The rule:** bound the process, not the script.
+
+```sh
+timeout 60 sh -c 'while :; do :; done' &     # dies on its own
+trap 'kill 0' EXIT INT TERM                  # fires on every exit path, including SIGTERM
+ulimit -t 30                                 # hard CPU-seconds ceiling
+```
+
+**Before reaching for synthetic load at all:** it is usually the wrong tool. To test behavior
+under CPU contention, prefer raising the timeout under test, asserting on the timeout value
+directly, or injecting a delay — none of which can outlive the session.
+
+The same rule covers anything that outlives its parent: dev servers, file watchers, tunnels,
+`tail -f`, polling loops. If you start one, either bound it or tell the operator it is running
+and how to stop it — in the same message, not a later one.
+
+## Clean up what you started, in the turn you started it
+
+Temp files, scratch scripts under `/tmp`, background jobs, spawned servers. If a command
+created it and the work is done, remove it before ending the turn. If it must outlive the turn,
+say so explicitly and give the exact command to stop or delete it.
+
+## Browser automation: use agent-browser
 
 When a task requires interacting with a browser — navigating pages, clicking elements, filling
 forms, taking screenshots, extracting page content, or testing a web UI — use `agent-browser`
