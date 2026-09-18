@@ -51,6 +51,12 @@ elif [ -f "${HOME}/.asdf/asdf.sh" ]; then
   fi
 fi
 
+# ——— mise Integration ———
+# Activate after asdf so a repository's mise.toml is authoritative there.
+if command -v mise &>/dev/null; then
+  eval "$(mise activate zsh)"
+fi
+
 # ——— Ghostty Integration ———
 if [[ -n ${GHOSTTY_RESOURCES_DIR:-} ]]; then
   source "${GHOSTTY_RESOURCES_DIR}/shell-integration/zsh/ghostty-integration"
